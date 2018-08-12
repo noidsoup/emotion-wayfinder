@@ -6,7 +6,6 @@ const process = require('process');
 const config = require('config');
 const http = require('http');
 const debug = require('debug')('server:server');
-const winston = require('winston');
 
 /**
  * Initialize basic setup.
@@ -71,5 +70,5 @@ server.listen(port, (err) => {
   if (err) {
     throw err;
   }
-  winston.info(`App running in ${process.env.NODE_ENV || 'none'} mode on port ${port}`);
+  console.info(`App running in ${process.env.NODE_ENV || 'none'} mode on port ${port}`);
 });

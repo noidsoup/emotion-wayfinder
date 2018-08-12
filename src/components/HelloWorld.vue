@@ -1,113 +1,67 @@
 <template>
-  <div class="hello">
-    <h1>{{ msg }}</h1>
-    <h2>Essential Links</h2>
-    <ul>
-      <li>
-        <a
-          href="https://vuejs.org"
-          target="_blank"
-        >
-          Core Docs
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://forum.vuejs.org"
-          target="_blank"
-        >
-          Forum
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://chat.vuejs.org"
-          target="_blank"
-        >
-          Community Chat
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://twitter.com/vuejs"
-          target="_blank"
-        >
-          Twitter
-        </a>
-      </li>
-      <br>
-      <li>
-        <a
-          href="http://vuejs-templates.github.io/webpack/"
-          target="_blank"
-        >
-          Docs for This Template
-        </a>
-      </li>
-    </ul>
-    <h2>Ecosystem</h2>
-    <ul>
-      <li>
-        <a
-          href="http://router.vuejs.org/"
-          target="_blank"
-        >
-          vue-router
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vuex.vuejs.org/"
-          target="_blank"
-        >
-          vuex
-        </a>
-      </li>
-      <li>
-        <a
-          href="http://vue-loader.vuejs.org/"
-          target="_blank"
-        >
-          vue-loader
-        </a>
-      </li>
-      <li>
-        <a
-          href="https://github.com/vuejs/awesome-vue"
-          target="_blank"
-        >
-          awesome-vue
-        </a>
-      </li>
-    </ul>
+  <div class="container">
+    <v-form>
+      <v-text-field
+        v-model="user.name"
+        label="name"
+      ></v-text-field>
+      <v-text-field
+        v-model="user.email"
+        label="email"
+      ></v-text-field>
+      </v-form>
+    <v-btn @click="registration">Success</v-btn>
   </div>
 </template>
 
 <script>
 export default {
-  name: 'HelloWorld',
+  name: 'registration',
   data() {
     return {
-      msg: 'Welcome to Your Vue.js App',
+      user: {
+        name: undefined,
+        email: undefined,
+      }
     };
+  },
+  methods: {
+    registration() {
+      fetch(`${this.$serverAddress}/registration`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(this.user),
+      }).then((res) => {
+        if (!res.ok) {
+          this.alert = true;
+          this.handleErrors(res);
+          return;
+        }
+        res.text().then((text) => {
+          storageProvider.set('account', JSON.parse(text));
+          EventBus.$emit('LOGOUT BUTTON');
+          EventBus.$emit('TOGGLE MENU DRAWER', true);
+          router.push('accounts');
+        });
+      }).catch((error) => {
+        console.error(error);
+        this.handleErrors(error);
+      });
+    },
+    handleErrors(error) {
+      console.log(error);
+      console.error(`error status code: ${error.status}, status text: ${error.statusText}`);
+    },
   },
 };
 </script>
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
-h1, h2 {
-  font-weight: normal;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
+.container {
+  padding-right: 1em;
+  padding-left: 1em;
 }
 </style>

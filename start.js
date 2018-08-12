@@ -1,4 +1,3 @@
-const winston = require('winston');
 const childProcess = require('child_process');
 const process = require('process');
 
@@ -9,7 +8,7 @@ const envs = {
 
 function getEnv() {
   if (process.env.NODE_ENV) {
-    winston.info(`NODE_ENV is set as ${process.env.NODE_ENV}`);
+    console.info(`NODE_ENV is set as ${process.env.NODE_ENV}`);
     return process.env.NODE_ENV;
   }
   const args = process.argv.slice(0);
@@ -26,7 +25,7 @@ if (getEnv() === 'development') {
     if (err) {
       throw err;
     }
-    console.log(stdout);
+    console.info(stdout);
   });
 }
 
