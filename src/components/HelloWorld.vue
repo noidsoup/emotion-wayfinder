@@ -2,84 +2,82 @@
   <div class="center-content page-container">
     <div style="position: relative; margin: 20px;">
       <video @playing="onPlay" id="inputVideo" autoplay muted></video>
-      <canvas id="overlay" />
+      <canvas id="overlay" :height="height" :width="width"/>
     </div>
   </div>
 </template>
 
 <script>
 import * as faceapi from 'face-api.js';
+
 export default {
   name: 'HelloWorld',
   data() {
     return {
       msg: 'Welcome to Your Vue.js App',
       selectedFaceDetector: null,
+      width: null,
+      height: null,
     };
   },
   methods: {
     onPlay() {
       const videoEl = document.getElementById('inputVideo');
       const overlay = document.getElementById('overlay');
-      let withBoxes = true;
+      const withBoxes = true;
       const SELF = this;
 
       // tiny_face_detector options
-      let inputSize = 512;
-      let scoreThreshold = 0.5;
+      const inputSize = 512;
+      const scoreThreshold = 0.5;
 
-      if(videoEl.paused || videoEl.ended || !this.isFaceDetectionModelLoaded())
-        return setTimeout(() => onPlay())
+      if (videoEl.paused || videoEl.ended || !this.isFaceDetectionModelLoaded()) {
+        return setTimeout(() => this.onPlay());
+      }
 
       function getFaceDetectorOptions() {
         return new faceapi.TinyFaceDetectorOptions({ inputSize, scoreThreshold });
       }
-
-      const options = getFaceDetectorOptions()
-      
+      const options = getFaceDetectorOptions();
       async function getResults() {
         const result = await faceapi.detectSingleFace(videoEl, options).withFaceExpressions();
         if (result) {
-          SELF.drawExpressions(videoEl, overlay, [result], withBoxes)
+          SELF.drawExpressions(videoEl, overlay, [result], withBoxes);
         }
-        setTimeout(() => SELF.onPlay())
+        setTimeout(() => SELF.onPlay());
       }
 
-      getResults();
-
+      return getResults();
     },
-    drawExpressions(dimensions, canvas, results, thresh, withBoxes = true) {
-      function resizeCanvasAndResults(dimensions, canvas, results) {
-        
-        const { width, height } = dimensions instanceof HTMLVideoElement
-          ? faceapi.getMediaDimensions(dimensions)
-          : dimensions
-        canvas.width = width
-        canvas.height = height
+    resizeCanvasAndResults(dimensions, canvas, results) {
+      const { width, height } = dimensions instanceof HTMLVideoElement
+        ? faceapi.getMediaDimensions(dimensions)
+        : dimensions;
+      this.width = width;
+      this.height = height;
 
-        // resize detections (and landmarks) in case displayed image is smaller than
-        // original size
-        return faceapi.resizeResults(results, { width, height })
+      // resize detections (and landmarks) in case displayed image is smaller than
+      // original size
+      return faceapi.resizeResults(results, { width, height });
+    },
+    drawExpressions(dimensions, canvas, faceAndEmotionDetection) {
+      const resizedResults =
+        this.resizeCanvasAndResults(dimensions, canvas, faceAndEmotionDetection);
+      function emotionGenerator(emotion) {
+        return emotion;
       }
-      const resizedResults = resizeCanvasAndResults(dimensions, canvas, results)
-
-/*       if (withBoxes) {
-        faceapi.drawDetection(canvas, resizedResults.map(det => det.detection), { withScore: false })
-      } */
-
-      function wat(wat) {
-        console.log(wat);
-        return wat;
-      };
-      faceapi.drawFaceExpressions(canvas, resizedResults.map(({ detection, expressions }) => (wat({ position: detection.box, expressions }))))
+      faceapi.drawFaceExpressions(
+        canvas,
+        resizedResults
+          .map(({ detection, expressions }) => (
+            emotionGenerator({ position: detection.box, expressions })),
+          ));
     },
     isFaceDetectionModelLoaded() {
-      return !!this.getCurrentFaceDetectionNet().params
+      return !!this.getCurrentFaceDetectionNet().params;
     },
     getCurrentFaceDetectionNet() {
-      if (this.selectedFaceDetector === 'tiny_face_detector') {
-        return faceapi.nets.tinyFaceDetector
-      }
+      return faceapi.nets.tinyFaceDetector;
     },
   },
   mounted() {
@@ -87,37 +85,29 @@ export default {
     this.selectedFaceDetector = TINY_FACE_DETECTOR;
     const SELF = this;
 
-/*     function getCurrentFaceDetectionNet() {
-      if (SELF.selectedFaceDetector === TINY_FACE_DETECTOR) {
-        console.log(faceapi.nets.tinyFaceDetector);
-        return faceapi.nets.tinyFaceDetector
-      }
-    } */
-
     function isFaceDetectionModelLoaded() {
-      return !!SELF.getCurrentFaceDetectionNet().params
+      return !!SELF.getCurrentFaceDetectionNet().params;
     }
 
-    //faceapi.nets.tinyFaceDetector().load('static/weights')
-    async function changeFaceDetector(detector) {
+    async function changeFaceDetector() {
       if (!isFaceDetectionModelLoaded()) {
-        await SELF.getCurrentFaceDetectionNet().load('/static/weights')
+        await SELF.getCurrentFaceDetectionNet().load('/static/weights');
       }
     }
 
     async function run() {
       // load face detection and face expression recognition models
       SELF.selectedFaceDetector = TINY_FACE_DETECTOR;
-      await changeFaceDetector(TINY_FACE_DETECTOR)
+      await changeFaceDetector(TINY_FACE_DETECTOR);
       await faceapi.loadFaceExpressionModel('/static/weights');
       // try to access users webcam and stream the images
       // to the video element
-      const stream = await navigator.mediaDevices.getUserMedia({ video: {} })
+      const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
       const videoEl = document.getElementById('inputVideo');
-      videoEl.srcObject = stream
+      videoEl.srcObject = stream;
     }
     run();
-  }
+  },
 };
 </script>
 
