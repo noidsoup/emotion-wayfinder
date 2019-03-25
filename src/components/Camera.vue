@@ -1,8 +1,8 @@
 <template>
   <div class="center-content page-container">
     <div style="position: relative; margin: 20px;">
-      <video @playing="onPlay" id="inputVideo" autoplay muted></video>
-      <canvas id="overlay" :height="height" :width="width"/>
+      <video @playing="onPlay" id="inputVideo" width="500" autoplay muted></video>
+      <canvas id="overlay" />
     </div>
   </div>
 </template>
@@ -11,41 +11,34 @@
 import * as faceapi from 'face-api.js';
 
 export default {
-  name: 'HelloWorld',
+  name: 'Camera',
   data() {
     return {
-      msg: 'Welcome to Your Vue.js App',
-      selectedFaceDetector: null,
-      width: null,
-      height: null,
     };
   },
   methods: {
     onPlay() {
       const videoEl = document.getElementById('inputVideo');
       const overlay = document.getElementById('overlay');
-      const withBoxes = true;
-      const SELF = this;
 
       // tiny_face_detector options
       const inputSize = 512;
       const scoreThreshold = 0.5;
 
-      if (videoEl.paused || videoEl.ended || !this.isFaceDetectionModelLoaded()) {
+      if (videoEl.paused || videoEl.ended) {
         return setTimeout(() => this.onPlay());
       }
 
-      function getFaceDetectorOptions() {
-        return new faceapi.TinyFaceDetectorOptions({ inputSize, scoreThreshold });
-      }
+      const getFaceDetectorOptions = () =>
+        new faceapi.TinyFaceDetectorOptions({ inputSize, scoreThreshold });
       const options = getFaceDetectorOptions();
-      async function getResults() {
+      const getResults = async () => {
         const result = await faceapi.detectSingleFace(videoEl, options).withFaceExpressions();
         if (result) {
-          SELF.drawExpressions(videoEl, overlay, [result], withBoxes);
+          this.drawExpressions(videoEl, overlay, [result]);
         }
-        setTimeout(() => SELF.onPlay());
-      }
+        setTimeout(() => this.onPlay());
+      };
 
       return getResults();
     },
@@ -53,8 +46,8 @@ export default {
       const { width, height } = dimensions instanceof HTMLVideoElement
         ? faceapi.getMediaDimensions(dimensions)
         : dimensions;
-      this.width = width;
-      this.height = height;
+      canvas.width = width;
+      canvas.height = height;
 
       // resize detections (and landmarks) in case displayed image is smaller than
       // original size
@@ -63,9 +56,7 @@ export default {
     drawExpressions(dimensions, canvas, faceAndEmotionDetection) {
       const resizedResults =
         this.resizeCanvasAndResults(dimensions, canvas, faceAndEmotionDetection);
-      function emotionGenerator(emotion) {
-        return emotion;
-      }
+      const emotionGenerator = emotion => emotion;
       faceapi.drawFaceExpressions(
         canvas,
         resizedResults
@@ -73,45 +64,24 @@ export default {
             emotionGenerator({ position: detection.box, expressions })),
           ));
     },
-    isFaceDetectionModelLoaded() {
-      return !!this.getCurrentFaceDetectionNet().params;
-    },
-    getCurrentFaceDetectionNet() {
-      return faceapi.nets.tinyFaceDetector;
-    },
   },
   mounted() {
-    const TINY_FACE_DETECTOR = 'tiny_face_detector';
-    this.selectedFaceDetector = TINY_FACE_DETECTOR;
-    const SELF = this;
+    const getCurrentFaceDetectionNet = () => faceapi.nets.tinyFaceDetector;
 
-    function isFaceDetectionModelLoaded() {
-      return !!SELF.getCurrentFaceDetectionNet().params;
-    }
-
-    async function changeFaceDetector() {
-      if (!isFaceDetectionModelLoaded()) {
-        await SELF.getCurrentFaceDetectionNet().load('/static/weights');
-      }
-    }
-
-    async function run() {
+    const run = async () => {
       // load face detection and face expression recognition models
-      SELF.selectedFaceDetector = TINY_FACE_DETECTOR;
-      await changeFaceDetector(TINY_FACE_DETECTOR);
+      await getCurrentFaceDetectionNet().load('/static/weights');
       await faceapi.loadFaceExpressionModel('/static/weights');
-      // try to access users webcam and stream the images
-      // to the video element
+      // try to access users webcam and stream the images to video element
       const stream = await navigator.mediaDevices.getUserMedia({ video: {} });
       const videoEl = document.getElementById('inputVideo');
       videoEl.srcObject = stream;
-    }
+    };
     run();
   },
 };
 </script>
 
-<!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
 .page-container {
   left: 0;
