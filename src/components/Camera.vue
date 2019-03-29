@@ -1,8 +1,10 @@
 <template>
-  <div class="center-content page-container">
-    <div style="position: relative; margin: 20px;">
-      <video @playing="onPlay" id="inputVideo" width="500" autoplay muted></video>
-      <canvas id="overlay" />
+  <div class="wat" :style="`background-color: ${color}; height: 100vh`">
+    <div class="center-content page-container" >
+      <div style="position: relative; margin: 20px;">
+        <video @playing="onPlay" id="inputVideo" width="800" autoplay muted></video>
+        <canvas id="overlay" />
+      </div>
     </div>
   </div>
 </template>
@@ -14,7 +16,19 @@ export default {
   name: 'Camera',
   data() {
     return {
+      recordedEmotions: [],
+      maxEmotionsCount: 10,
+      color: 'black',
     };
+  },
+  watch: {
+    recordedEmotions(emotions) {
+      // eslint-disable-next-line
+      console.log('recorded emotion', emotions.length);
+      if (emotions.length === this.maxEmotionsCount) {
+        this.analyzeEmotions(emotions);
+      }
+    },
   },
   methods: {
     onPlay() {
@@ -42,18 +56,61 @@ export default {
 
       return getResults();
     },
+    setColor(emotion) {
+      if (emotion === 'neutral') {
+        this.color = 'black';
+      }
+      if (emotion === 'happy') {
+        this.color = 'yellow';
+      }
+      if (emotion === 'sad') {
+        this.color = 'blue';
+      }
+      if (emotion === 'angry') {
+        this.color = 'red';
+      }
+      if (emotion === 'disgusted') {
+        this.color = 'green';
+      }
+      if (emotion === 'surprised') {
+        this.color = 'white';
+      }
+      if (emotion === 'fearful') {
+        this.color = 'red';
+      }
+    },
     resizeCanvasAndResults(dimensions, canvas, results) {
       const { width, height } = dimensions instanceof HTMLVideoElement
         ? faceapi.getMediaDimensions(dimensions)
         : dimensions;
+      // eslint-disable-next-line
       canvas.width = width;
+      // eslint-disable-next-line
       canvas.height = height;
 
       // resize detections (and landmarks) in case displayed image is smaller than
       // original size
       return faceapi.resizeResults(results, { width, height });
     },
+    analyzeEmotions() {
+      let totalEmotions = [];
+      this.recordedEmotions.forEach((arr) => {
+        totalEmotions = totalEmotions.concat(arr);
+      });
+      const reducedEmotion = totalEmotions.reduce(
+        // eslint-disable-next-line
+        (max, emotion) => max && max.probability > emotion.probability ? max : emotion, null,
+      );
+      this.setColor(reducedEmotion.expression);
+      this.recordedEmotions = [];
+      // eslint-disable-next-line
+      console.log('most dominant emotion', reducedEmotion.expression);
+    },
     drawExpressions(dimensions, canvas, faceAndEmotionDetection) {
+      if (this.recordedEmotions.length < this.maxEmotionsCount
+          && faceAndEmotionDetection[0].expressions !== undefined) {
+        this.recordedEmotions.push(faceAndEmotionDetection[0].expressions);
+      }
       const resizedResults =
         this.resizeCanvasAndResults(dimensions, canvas, faceAndEmotionDetection);
       const emotionGenerator = emotion => emotion;
@@ -99,47 +156,12 @@ export default {
   }
 }
 
-#navbar {
-  position: absolute;
-  top: 20px;
-  left: 20px;
-}
-
 .center-content {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-}
-
-.side-by-side {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.side-by-side >* {
-  margin: 0 5px;
-}
-
-.bold {
-  font-weight: bold;
-}
-
-.margin-sm {
-  margin: 5px;
-}
-
-.margin {
-  margin: 20px;
-}
-
-.button-sm {
-  padding: 0 10px !important;
-}
-
-.pad-sides-sm {
-  padding: 0 8px !important;
 }
 
 #overlay, .overlay {
@@ -151,4 +173,12 @@ export default {
 #facesContainer canvas {
   margin: 10px;
 }
+
+.wat {
+    -moz-transition: background-color 3s ease-in;
+    -o-transition: background-color 3s ease-in;
+    -webkit-transition: background-color 3s ease-in;
+    transition: background-color 3s ease-in;
+}
+
 </style>
