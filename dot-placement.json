@@ -1,0 +1,46 @@
+{
+  "emotions" : {
+    "neutral" : {
+      "placement" : {
+        "x" : "260",
+        "y" : "240"
+      }
+    },
+    "angry" : {
+      "placement" : {
+        "x" : "260",
+        "y" : "240"
+      }
+    },
+    "happy" : {
+      "placement" : {
+        "x" : "260",
+        "y" : "240"
+      }
+    },
+    "sad" : {
+      "placement" : {
+        "x" : "260",
+        "y" : "240"
+      }
+    },
+    "fearful" : {
+      "placement" : {
+        "x" : "260",
+        "y" : "240"
+      }
+    },
+    "surprised" : {
+      "placement" : {
+        "x" : "260",
+        "y" : "240"
+      }
+    },
+    "disgusted" : {
+      "placement" : {
+        "x" : "260",
+        "y" : "240"
+      }
+    }
+  }
+}

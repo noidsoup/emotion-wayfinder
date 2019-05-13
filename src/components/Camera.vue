@@ -5,6 +5,7 @@
         <video @playing="onPlay" id="inputVideo" width="800" autoplay muted></video>
         <canvas id="overlay" />
       </div>
+      <h1>{{seconds}}</h1>
     </div>
   </div>
 </template>
@@ -17,14 +18,14 @@ export default {
   data() {
     return {
       recordedEmotions: [],
-      maxEmotionsCount: 10,
+      maxEmotionsCount: 20,
       color: 'black',
+      seconds: 0,
     };
   },
   watch: {
     recordedEmotions(emotions) {
       // eslint-disable-next-line
-      console.log('recorded emotion', emotions.length);
       if (emotions.length === this.maxEmotionsCount) {
         this.analyzeEmotions(emotions);
       }
@@ -57,26 +58,9 @@ export default {
       return getResults();
     },
     setColor(emotion) {
-      if (emotion === 'neutral') {
-        this.color = 'black';
-      }
-      if (emotion === 'happy') {
-        this.color = 'yellow';
-      }
-      if (emotion === 'sad') {
-        this.color = 'blue';
-      }
-      if (emotion === 'angry') {
-        this.color = 'red';
-      }
-      if (emotion === 'disgusted') {
-        this.color = 'green';
-      }
-      if (emotion === 'surprised') {
-        this.color = 'white';
-      }
-      if (emotion === 'fearful') {
-        this.color = 'red';
+      this.$store.commit('setEmotion', emotion);
+      if (this.seconds >= 30) {
+        this.$router.push('results');
       }
     },
     resizeCanvasAndResults(dimensions, canvas, results) {
@@ -104,7 +88,6 @@ export default {
       this.setColor(reducedEmotion.expression);
       this.recordedEmotions = [];
       // eslint-disable-next-line
-      console.log('most dominant emotion', reducedEmotion.expression);
     },
     drawExpressions(dimensions, canvas, faceAndEmotionDetection) {
       if (this.recordedEmotions.length < this.maxEmotionsCount
@@ -135,6 +118,9 @@ export default {
       videoEl.srcObject = stream;
     };
     run();
+    setInterval(() => {
+      this.seconds = this.seconds + 1;
+    }, 1000);
   },
 };
 </script>
@@ -175,10 +161,10 @@ export default {
 }
 
 .wat {
-    -moz-transition: background-color 3s ease-in;
-    -o-transition: background-color 3s ease-in;
-    -webkit-transition: background-color 3s ease-in;
-    transition: background-color 3s ease-in;
+  -moz-transition: background-color 3s ease-in;
+  -o-transition: background-color 3s ease-in;
+  -webkit-transition: background-color 3s ease-in;
+  transition: background-color 3s ease-in;
 }
 
 </style>
