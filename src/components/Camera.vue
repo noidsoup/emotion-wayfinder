@@ -1,8 +1,13 @@
 <template>
-  <div class="wat" :style="`background-color: ${color}; height: 100vh`">
+  <div class="wat" style="`height: 100vh`">
     <div class="center-content page-container" >
       <div style="position: relative; margin: 20px;">
-        <video @playing="onPlay" id="inputVideo" width="800" autoplay muted></video>
+        <video
+          :style="`box-shadow: -20px 25px 150px ${color};`"
+          @playing="onPlay"
+          id="inputVideo"
+          width="800"
+          autoplay muted></video>
         <canvas id="overlay" />
       </div>
       <h1>{{seconds}}</h1>
@@ -20,7 +25,7 @@ export default {
       recordedEmotions: [],
       maxEmotionsCount: 5,
       color: 'black',
-      seconds: 0,
+      seconds: 10,
     };
   },
   watch: {
@@ -32,6 +37,29 @@ export default {
     },
   },
   methods: {
+    setColor(emotion) {
+      if (emotion === 'neutral') {
+        this.color = 'black';
+      }
+      if (emotion === 'happy') {
+        this.color = 'yellow';
+      }
+      if (emotion === 'sad') {
+        this.color = 'blue';
+      }
+      if (emotion === 'angry') {
+        this.color = 'red';
+      }
+      if (emotion === 'disgusted') {
+        this.color = 'green';
+      }
+      if (emotion === 'surprised') {
+        this.color = 'white';
+      }
+      if (emotion === 'fearful') {
+        this.color = 'red';
+      }
+    },
     onPlay() {
       const videoEl = document.getElementById('inputVideo');
       const overlay = document.getElementById('overlay');
@@ -57,9 +85,9 @@ export default {
 
       return getResults();
     },
-    setColor(emotion) {
+    setEmotion(emotion) {
       this.$store.commit('setEmotion', emotion);
-      if (this.seconds >= 5) {
+      if (this.seconds === 0) {
         this.$router.push('results');
       }
     },
@@ -86,6 +114,7 @@ export default {
         (max, emotion) => max && max.probability > emotion.probability ? max : emotion, null,
       );
       this.setColor(reducedEmotion.expression);
+      this.setEmotion(reducedEmotion.expression);
       this.recordedEmotions = [];
       // eslint-disable-next-line
     },
@@ -117,9 +146,10 @@ export default {
       const videoEl = document.getElementById('inputVideo');
       videoEl.srcObject = stream;
     };
+
     run();
     setInterval(() => {
-      this.seconds = this.seconds + 1;
+      this.seconds = this.seconds - 1;
     }, 1000);
   },
 };
@@ -160,11 +190,11 @@ export default {
   margin: 10px;
 }
 
-.wat {
-  -moz-transition: background-color 3s ease-in;
-  -o-transition: background-color 3s ease-in;
-  -webkit-transition: background-color 3s ease-in;
-  transition: background-color 3s ease-in;
+video {
+  -moz-transition: box-shadow 3s ease-in;
+  -o-transition: box-shadow 3s ease-in;
+  -webkit-transition: box-shadow 3s ease-in;
+  transition: box-shadow 3s ease-in;
 }
 
 </style>
