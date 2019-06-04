@@ -18,7 +18,7 @@ export default {
   data() {
     return {
       recordedEmotions: [],
-      maxEmotionsCount: 20,
+      maxEmotionsCount: 5,
       color: 'black',
       seconds: 0,
     };
@@ -59,7 +59,7 @@ export default {
     },
     setColor(emotion) {
       this.$store.commit('setEmotion', emotion);
-      if (this.seconds >= 30) {
+      if (this.seconds >= 5) {
         this.$router.push('results');
       }
     },
