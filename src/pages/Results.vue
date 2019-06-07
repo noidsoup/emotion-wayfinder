@@ -1,10 +1,10 @@
 <template>
   <div>
-    overall, you seem
+    <p>overall, you seem<p>
     <h1>{{$store.state.emotion}}</h1>
-    <div id="container">
+    <div class="container">
       <!-- <img class='img' width="500" src="../assets/Exhibit-Hall-map.jpg" alt="" /> -->
-      <canvas id="gameCanvas" width="500"></canvas>
+      <canvas id="gameCanvas"></canvas>
     </div>
   </div>
 </template>
@@ -23,7 +23,7 @@ export default {
     const x = dotPlacement.emotions[this.$store.state.emotion].placement.x;
     const y = dotPlacement.emotions[this.$store.state.emotion].placement.y;
     ctx.fillStyle = 'red';
-    ctx.fillRect(x, y, 20, 20);
+    ctx.fillRect(x, y, 10, 10);
   },
 };
 </script>
@@ -33,22 +33,23 @@ export default {
   position:absolute;z-index:1;
 }
 
-#container {
+.container {
   display:inline-block;
-  width:500px;
-  height: 600px;
   margin: 0 auto;
-  margin-top: 100px;
-  background-image: url('../assets/Exhibit-Hall-map.jpg');
+  background-image: url('../assets/Exhibit-Hall-map.png');
   position:relative;
   border:5px solid black;
   background-repeat: round;
   border-radius: 10px;
+  width: 1000px;
+  height: 900px;
   box-shadow: 0 5px 20px #333
 }
 
 #gameCanvas{
   position:relative;
   z-index:20;
+  width: 100%;
+  height: 100%;
 }
 </style>

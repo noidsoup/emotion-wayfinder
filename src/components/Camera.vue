@@ -1,7 +1,7 @@
 <template>
   <div class="wat" style="`height: 100vh`">
     <div class="center-content page-container" >
-      <div style="position: relative; margin: 20px;">
+      <div style="position: relative; margin: 3em;">
         <video
           :style="`box-shadow: -20px 25px 150px ${color};`"
           @playing="onPlay"
@@ -161,7 +161,6 @@ export default {
   right: 0;
   margin: auto;
   margin-top: 20px;
-  padding-left: 280px;
   display: inline-flex !important;
 }
 
