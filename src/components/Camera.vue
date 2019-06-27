@@ -25,7 +25,7 @@ export default {
       recordedEmotions: [],
       maxEmotionsCount: 5,
       color: 'black',
-      seconds: 10,
+      seconds: 20,
     };
   },
   watch: {
@@ -149,7 +149,9 @@ export default {
 
     run();
     setInterval(() => {
-      this.seconds = this.seconds - 1;
+      if (this.recordedEmotions.length > 0) {
+        this.seconds = this.seconds - 1;
+      }
     }, 1000);
   },
 };
